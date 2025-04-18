@@ -149,7 +149,11 @@ spec:
                   numCPUs: '{{ fromConfigMap "policies" "opp-settings" "vmwareCPU" | toInt }}'
                   numCoresPerSocket: 4
                   snapshot: ""
-                  template: {{ (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").status.infrastructureName }}-rhcos-generated-region-generated-zone
+                  {{- $tmpsuffix := "region-generated-zone" }}
+                  {{- if semverCompare ">1.18" (fromClusterClaim "openshiftversion-major-minor") }}
+                    {{- $tmpsuffix = "failure-domain" }}
+                  {{- end }}
+                  template: {{ (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").status.infrastructureName }}-rhcos-generated-{{ $tmpsuffix}}
                   userDataSecret:
                     name: worker-user-data
                   workspace:
